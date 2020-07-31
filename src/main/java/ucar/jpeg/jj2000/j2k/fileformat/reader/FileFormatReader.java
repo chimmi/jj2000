@@ -137,6 +137,7 @@ public class FileFormatReader implements FileFormatBoxes {
             while(!lastBoxFound) {
                 pos = in.getPos();
                 length = in.readInt();
+                longLength = 0;
                 if((pos+length) == in.length())
                     lastBoxFound = true;
 
@@ -146,8 +147,7 @@ public class FileFormatReader implements FileFormatBoxes {
                     length = in.length()-in.getPos();
                 } else if(length == 1) {
                     longLength = in.readLong();
-                    throw new IOException("File too long.");
-                } else longLength = (long) 0;
+                };
 
                 switch(box) {
                 case CONTIGUOUS_CODESTREAM_BOX:
@@ -183,7 +183,7 @@ public class FileFormatReader implements FileFormatBoxes {
 				 Integer.toHexString(box));
                 }
                 if(!lastBoxFound)
-                    in.seek(pos+length);
+                    in.seek(pos+(int)(longLength != 0 ? longLength : length));
             }
         } catch(EOFException e) {
             throw new Error("EOF reached before finding Contiguous "+
